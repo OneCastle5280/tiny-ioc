@@ -1,4 +1,4 @@
-package org.wang.tinyioc.context;
+package org.wang.tinyioc.bean;
 
 /**
  * bean 工厂，即 ioc 容器
@@ -8,7 +8,7 @@ package org.wang.tinyioc.context;
 public interface BeanFactory {
 
     /**
-     * 根据 beanName 获取 Bean
+     * get bean by beanName
      *
      * @param beanName
      * @return

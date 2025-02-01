@@ -1,7 +1,7 @@
 package org.wang.tinyioc.processor;
 
 /**
- * bean factory 后置处理器
+ * bean factory post processor
  *
  * @author wangjiabao
  */

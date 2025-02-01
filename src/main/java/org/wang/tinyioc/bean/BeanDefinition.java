@@ -1,9 +1,14 @@
 package org.wang.tinyioc.bean;
 
 /**
- * bean 定义
+ * bean definition
  *
  * @author wangjiabao
  */
 public interface BeanDefinition {
+
+    /**
+     * scope singleton
+     */
+    String SCOPE_SINGLETON = "singleton";
 }
