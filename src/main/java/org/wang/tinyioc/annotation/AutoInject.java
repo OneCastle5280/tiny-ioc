@@ -1,7 +1,7 @@
 package org.wang.tinyioc.annotation;
 
 /**
- * 自动注入依赖
+ * auto-inject bean
  *
  * @author wangjiabao
  */

@@ -2,16 +2,41 @@ package org.wang.tinyioc.bean;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author wangjiabao
  */
-public abstract class AbstractBeanFactory implements BeanFactory {
+public abstract class AbstractListableBeanFactory implements ListableBeanFactory {
 
     /**
      * beanName -> instance
      */
     private final Map<String, Object> beanInstanceMap = new HashMap<>();
+
+    /**
+     * key -> value: beanName -> BeanDefinition
+     */
+    private final Map<String, BeanDefinition> beanDefinitionMap = new ConcurrentHashMap<>(16);
+
+    @Override
+    public void registerBeanDefinition(String beanName, BeanDefinition beanDefinition) {
+        if (beanDefinitionMap.containsKey(beanName)) {
+            throw new IllegalStateException("BeanDefinition [" + beanName + "] already exists");
+        }
+        // register
+        beanDefinitionMap.put(beanName, beanDefinition);
+    }
+
+    @Override
+    public Map<String, BeanDefinition> getBeanDefinitionMap() {
+        return this.beanDefinitionMap;
+    }
+
+    @Override
+    public boolean containBeanDefinition(String beanName) {
+        return this.beanDefinitionMap.containsKey(beanName);
+    }
 
     @Override
     public void instantiateSingletons(String beanName, RootBeanDefinition beanDefinition) {
@@ -21,6 +46,11 @@ public abstract class AbstractBeanFactory implements BeanFactory {
     @Override
     public void addBean(String beanName, Object bean) {
         this.beanInstanceMap.put(beanName, bean);
+    }
+
+    @Override
+    public Object getBean(String beanName) {
+        return this.beanInstanceMap.get(beanName);
     }
 
     protected void createBean(String beanName, RootBeanDefinition beanDefinition) {

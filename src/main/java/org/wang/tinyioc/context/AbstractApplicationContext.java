@@ -1,41 +1,47 @@
 package org.wang.tinyioc.context;
 
 import org.wang.tinyioc.bean.*;
+import org.wang.tinyioc.processor.BeanDefinitionRegistryPostProcessor;
 import org.wang.tinyioc.processor.BeanFactoryPostProcessor;
+import org.wang.tinyioc.processor.BeanPostProcessor;
 import org.wang.tinyioc.utils.BeanNameGenUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 /**
  * @author wangjiabao
  */
-public abstract class AbstractApplicationContext implements ApplicationContext {
+public abstract class AbstractApplicationContext extends AbstractListableBeanFactory {
 
     /**
      * bean factory
      */
-    private final BeanFactory beanFactory;
-
-    /**
-     * bean definition register
-     */
-    private final BeanDefinitionRegister beanDefinitionRegister;
+    private final ListableBeanFactory beanFactory;
 
     /**
      * bean factory post processors
      */
     private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>(16);
 
+    /**
+     * bean post processors
+     */
+    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>(16);
+
     public AbstractApplicationContext() {
-        this.beanFactory = new DefaultBeanFactory();
-        this.beanDefinitionRegister = new DefaultBeanDefinitionRegister();
+        this.beanFactory = new DefaultListableBeanFactory();
     }
 
     public void register(Class<?> clazz, BeanDefinition beanDefinition) {
         String beanName = BeanNameGenUtils.parseBeanName(clazz);
-        this.beanDefinitionRegister.registerBeanDefinition(beanName, beanDefinition);
+        this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
+    }
+
+    public void register(String beanName, BeanDefinition beanDefinition) {
+        this.beanFactory.registerBeanDefinition(beanName, beanDefinition);
     }
 
     /**
@@ -55,20 +61,16 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
             // prepare refresh
             prepareRefresh();
             // get bean factory
-            BeanFactory beanFactory = getBeanFactory();
-            // get bean definition register
-            BeanDefinitionRegister beanDefinitionRegister = getBeanDefinitionRegister();
+            ListableBeanFactory beanFactory = getBeanFactory();
             // prepare bean factory
             prepareBeanFactory(beanFactory);
-            // allow post process bean factory
-            postProcessBeanFactory(beanFactory);
             // invoke BeanFactoryPostProcessor
-            invokeBeanFactoryPostProcessors(beanFactory);
+            invokeBeanFactoryPostProcessors(beanFactory, getBeanFactoryPostProcessors());
             // register BeanPostProcessors
-            registerBeanPostProcessor(beanFactory);
+            registerBeanPostProcessor(beanFactory, getBeanPostProcessors());
             // TODO listener
             // beanFactory initialization
-            beanFactoryInitialization(beanFactory, beanDefinitionRegister);
+            beanFactoryInitialization(beanFactory, beanFactory);
             // finish
             finishRefresh();
         } catch (Exception e) {
@@ -97,20 +99,39 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
         });
     }
 
-    protected void postProcessBeanFactory(BeanFactory beanFactory) {
-        // For subclasses: do nothing by default.
+    protected void invokeBeanFactoryPostProcessors(ListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) throws Exception {
+        if (beanFactoryPostProcessors == null || beanFactoryPostProcessors.isEmpty()) {
+            return;
+        }
+
+        final List<BeanDefinitionRegistryPostProcessor> registerBeanFactoryPostProcessors = new ArrayList<>();
+        final List<BeanFactoryPostProcessor> postProcessors = new ArrayList<>();
+
+        // invoke BeanFactoryPostProcessors
+        for (BeanFactoryPostProcessor processor : beanFactoryPostProcessors) {
+            if (processor instanceof BeanDefinitionRegistryPostProcessor) {
+                registerBeanFactoryPostProcessors.add((BeanDefinitionRegistryPostProcessor) processor);
+            }
+            postProcessors.add(processor);
+        }
+        // TODO sort processors
+        // invoke postProcessBeanDefinitionRegistry
+        for (BeanDefinitionRegistryPostProcessor registryPostProcessor : registerBeanFactoryPostProcessors) {
+            registryPostProcessor.postProcessBeanDefinitionRegistry(beanFactory);
+        }
+
+        // invoke postProcessBeanFactory
+        for (BeanFactoryPostProcessor postProcessor : postProcessors) {
+            postProcessor.postProcessBeanFactory(beanFactory);
+        }
     }
 
-    protected void invokeBeanFactoryPostProcessors(BeanFactory beanFactory) {
-        // TODO
-    }
-
-    protected void registerBeanPostProcessor(BeanFactory beanFactory) {
+    protected void registerBeanPostProcessor(BeanFactory beanFactory, List<BeanPostProcessor> beanPostProcessors) {
         // TODO
     }
 
     /**
-     * Prepare bean factory
+     * prepare bean definition register
      */
     protected void prepareBeanFactory(BeanFactory beanFactory) {
         // TODO
@@ -126,19 +147,21 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * get bean factory
      */
-    private BeanFactory getBeanFactory() {
+    protected ListableBeanFactory getBeanFactory() {
         return this.beanFactory;
     }
 
     /**
-     * get BeanFactoryPostProcessors {@link BeanFactoryPostProcessor}
+     * get beanFactoryPostProcessors {@link BeanFactoryPostProcessor}
      */
-    private List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
+    protected List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
         return this.beanFactoryPostProcessors;
     }
 
-
-    private BeanDefinitionRegister getBeanDefinitionRegister() {
-        return this.beanDefinitionRegister;
+    /**
+     * get beanPostProcessors {@link BeanPostProcessor}
+     */
+    protected List<BeanPostProcessor> getBeanPostProcessors() {
+        return this.beanPostProcessors;
     }
 }

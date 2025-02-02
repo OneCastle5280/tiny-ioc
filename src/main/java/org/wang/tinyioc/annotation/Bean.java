@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 /**
  * @author wangjiabao
  */
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Component {
+public @interface Bean {
 }

@@ -1,6 +1,5 @@
 package org.wang.tinyioc.bean;
 
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -12,9 +11,6 @@ public interface BeanDefinitionRegister {
 
     /**
      * register BeanDefinition
-     *
-     * @param beanName
-     * @param beanDefinition
      */
     void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
 
@@ -22,4 +18,9 @@ public interface BeanDefinitionRegister {
      * get BeanDefinition map
      */
     Map<String, BeanDefinition> getBeanDefinitionMap();
+
+    /**
+     * contain BeanDefinition
+     */
+    boolean containBeanDefinition(String beanName);
 }
