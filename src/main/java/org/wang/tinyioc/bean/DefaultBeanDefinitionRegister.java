@@ -1,5 +1,6 @@
 package org.wang.tinyioc.bean;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -22,5 +23,10 @@ public class DefaultBeanDefinitionRegister extends AbstractBeanDefinitionRegiste
         }
         // register
         beanDefinitionMap.put(beanName, beanDefinition);
+    }
+
+    @Override
+    public Map<String, BeanDefinition> getBeanDefinitionMap() {
+        return this.beanDefinitionMap;
     }
 }

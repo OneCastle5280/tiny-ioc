@@ -1,5 +1,8 @@
 package org.wang.tinyioc.bean;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * Bean Definition 注册接口
  *
@@ -8,10 +11,15 @@ package org.wang.tinyioc.bean;
 public interface BeanDefinitionRegister {
 
     /**
-     * 注册 BeanDefinition
+     * register BeanDefinition
      *
      * @param beanName
      * @param beanDefinition
      */
     void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
+
+    /**
+     * get BeanDefinition map
+     */
+    Map<String, BeanDefinition> getBeanDefinitionMap();
 }

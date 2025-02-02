@@ -6,6 +6,7 @@ import org.wang.tinyioc.utils.BeanNameGenUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author wangjiabao
@@ -55,6 +56,8 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
             prepareRefresh();
             // get bean factory
             BeanFactory beanFactory = getBeanFactory();
+            // get bean definition register
+            BeanDefinitionRegister beanDefinitionRegister = getBeanDefinitionRegister();
             // prepare bean factory
             prepareBeanFactory(beanFactory);
             // allow post process bean factory
@@ -63,13 +66,13 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
             invokeBeanFactoryPostProcessors(beanFactory);
             // register BeanPostProcessors
             registerBeanPostProcessor(beanFactory);
-            // TODO Listener
+            // TODO listener
             // beanFactory initialization
-            beanFactoryInitialization(beanFactory);
+            beanFactoryInitialization(beanFactory, beanDefinitionRegister);
             // finish
             finishRefresh();
         } catch (Exception e) {
-
+            // TODO
         }
     }
 
@@ -80,11 +83,18 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
     /**
      * initialize bean factory
      */
-    protected void beanFactoryInitialization(BeanFactory beanFactory) {
-        // 实例前置处理器
-        // 实例化
-        // 属性值依赖注入
-        // 后置处理器
+    protected void beanFactoryInitialization(BeanFactory beanFactory, BeanDefinitionRegister beanDefinitionRegister) {
+        Map<String, BeanDefinition> beanDefinitionMap = beanDefinitionRegister.getBeanDefinitionMap();
+        if (beanDefinitionMap == null || beanDefinitionMap.isEmpty()) {
+            return;
+        }
+        beanDefinitionMap.forEach((beanName, beanDefinition) -> {
+            if (beanDefinition instanceof RootBeanDefinition) {
+                RootBeanDefinition rootBeanDefinition = (RootBeanDefinition) beanDefinition;
+                // initialize bean
+                beanFactory.instantiateSingletons(beanName, rootBeanDefinition);
+            }
+        });
     }
 
     protected void postProcessBeanFactory(BeanFactory beanFactory) {
@@ -125,5 +135,10 @@ public abstract class AbstractApplicationContext implements ApplicationContext {
      */
     private List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
         return this.beanFactoryPostProcessors;
+    }
+
+
+    private BeanDefinitionRegister getBeanDefinitionRegister() {
+        return this.beanDefinitionRegister;
     }
 }
