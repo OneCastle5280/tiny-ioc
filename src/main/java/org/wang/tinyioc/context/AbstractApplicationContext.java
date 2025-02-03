@@ -7,7 +7,6 @@ import org.wang.tinyioc.processor.BeanPostProcessor;
 import org.wang.tinyioc.utils.BeanNameGenUtils;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -20,16 +19,6 @@ public abstract class AbstractApplicationContext extends AbstractListableBeanFac
      * bean factory
      */
     private final ListableBeanFactory beanFactory;
-
-    /**
-     * bean factory post processors
-     */
-    private final List<BeanFactoryPostProcessor> beanFactoryPostProcessors = new ArrayList<>(16);
-
-    /**
-     * bean post processors
-     */
-    private final List<BeanPostProcessor> beanPostProcessors = new ArrayList<>(16);
 
     public AbstractApplicationContext() {
         this.beanFactory = new DefaultListableBeanFactory();
@@ -126,8 +115,22 @@ public abstract class AbstractApplicationContext extends AbstractListableBeanFac
         }
     }
 
-    protected void registerBeanPostProcessor(BeanFactory beanFactory, List<BeanPostProcessor> beanPostProcessors) {
-        // TODO
+    protected void registerBeanPostProcessor(ListableBeanFactory beanFactory, List<BeanPostProcessor> beanPostProcessors) {
+        // find all BeanPostProcessors Definition
+        List<BeanDefinition> beanPostProcessDefinitionList = beanFactory.findByType(BeanPostProcessor.class);
+        if (beanPostProcessDefinitionList == null || beanPostProcessDefinitionList.isEmpty()) {
+            return;
+        }
+
+        for (BeanDefinition beanDefinition : beanPostProcessDefinitionList) {
+            if (beanDefinition instanceof RootBeanDefinition) {
+                RootBeanDefinition rbd = (RootBeanDefinition) beanDefinition;
+                // get from beanFactory
+                Object postProcessor = beanFactory.getBean(rbd.getBeanName());
+                // register
+                beanFactory.addBeanPostProcessor((BeanPostProcessor) postProcessor);
+            }
+        }
     }
 
     /**
@@ -149,19 +152,5 @@ public abstract class AbstractApplicationContext extends AbstractListableBeanFac
      */
     protected ListableBeanFactory getBeanFactory() {
         return this.beanFactory;
-    }
-
-    /**
-     * get beanFactoryPostProcessors {@link BeanFactoryPostProcessor}
-     */
-    protected List<BeanFactoryPostProcessor> getBeanFactoryPostProcessors() {
-        return this.beanFactoryPostProcessors;
-    }
-
-    /**
-     * get beanPostProcessors {@link BeanPostProcessor}
-     */
-    protected List<BeanPostProcessor> getBeanPostProcessors() {
-        return this.beanPostProcessors;
     }
 }

@@ -1,5 +1,6 @@
 package org.wang.tinyioc.bean;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,6 +14,16 @@ public interface BeanDefinitionRegister {
      * register BeanDefinition
      */
     void registerBeanDefinition(String beanName, BeanDefinition beanDefinition);
+
+    /**
+     * find BeanDefinition by type
+     */
+    List<BeanDefinition> findByType(Class<?> clazz);
+
+    /**
+     * find BeanDefinition by name
+     */
+    BeanDefinition findByName(String beanName);
 
     /**
      * get BeanDefinition map

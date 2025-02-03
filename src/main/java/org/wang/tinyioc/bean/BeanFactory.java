@@ -13,6 +13,11 @@ public interface BeanFactory {
     Object getBean(String beanName);
 
     /**
+     * get bean by type
+     */
+    Object getBean(Class<?> clazz);
+
+    /**
      * add bean to beanFactory
      */
     void addBean(String beanName, Object bean);
